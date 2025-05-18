@@ -1,0 +1,117 @@
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class FileOperations {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        while (true) {
+            System.out.println("\nFile Operations Menu:");
+            System.out.println("1. Read a file");
+            System.out.println("2. Write to a file");
+            System.out.println("3. Append to a file");
+            System.out.println("4. Modify a file (replace text)");
+            System.out.println("5. Delete a file");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+            
+            int choice = scanner.nextInt();
+            scanner.nextLine(); 
+            
+            try {
+                switch (choice) {
+                    case 1:
+                        readFile(scanner);
+                        break;
+                    case 2:
+                        writeFile(scanner, false);
+                        break;
+                    case 3:
+                        writeFile(scanner, true);
+                        break;
+                    case 4:
+                        modifyFile(scanner);
+                        break;
+                    case 5:
+                        deleteFile(scanner);
+                        break;
+                    case 6:
+                        System.out.println("Exiting program...");
+                        scanner.close();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            } catch (IOException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+    }
+
+    
+    private static void readFile(Scanner scanner) throws IOException {
+        System.out.print("Enter the file path to read: ");
+        String filePath = scanner.nextLine();
+        
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        System.out.println("\nFile content:");
+        lines.forEach(System.out::println);
+    }
+
+    
+    private static void writeFile(Scanner scanner, boolean append) throws IOException {
+        System.out.print("Enter the file path: ");
+        String filePath = scanner.nextLine();
+        
+        System.out.println("Enter your text (type 'END' on a new line to finish):");
+        StringBuilder content = new StringBuilder();
+        String line;
+        while (!(line = scanner.nextLine()).equals("END")) {
+            content.append(line).append("\n");
+        }
+        
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter(filePath, append))) {
+            writer.write(content.toString());
+        }
+        
+        System.out.println("Content has been " + (append ? "appended to" : "written to") + " the file.");
+    }
+
+    
+    private static void modifyFile(Scanner scanner) throws IOException {
+        System.out.print("Enter the file path to modify: ");
+        String filePath = scanner.nextLine();
+        
+        
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        System.out.println("\nCurrent file content:");
+        lines.forEach(System.out::println);
+        
+        System.out.print("\nEnter text to replace: ");
+        String oldText = scanner.nextLine();
+        System.out.print("Enter new text: ");
+        String newText = scanner.nextLine();
+        
+        
+        List<String> modifiedLines = lines.stream()
+                .map(line -> line.replace(oldText, newText))
+                .collect(Collectors.toList());
+        
+        
+        Files.write(Paths.get(filePath), modifiedLines);
+        System.out.println("File has been modified successfully.");
+    }
+
+    
+    private static void deleteFile(Scanner scanner) throws IOException {
+        System.out.print("Enter the file path to delete: ");
+        String filePath = scanner.nextLine();
+        
+        Files.deleteIfExists(Paths.get(filePath));
+        System.out.println("File has been deleted successfully.");
+    }
+}
